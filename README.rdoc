@@ -1,28 +1,11 @@
-== README
+This is a project to help me better understand the RESTful API. Learning to build APIs with good HTTP responses and convention.
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Owner has_many Cribs
+Crib has_many Tenants | belongs_to # Owner
+Tenant belongs_to Crib,
 
-Things you may want to cover:
+## Getting the collection or Cribs in the DB
+`GET http://YOUR_URL/cribs/` returns JSON
 
-* Ruby version
-
-* System dependencies
-
-* Configuration
-
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
-
-
-Please feel free to use a different markup language if you do not plan to run
-<tt>rake doc:app</tt>.
+## Getting the details of a Crib:
+`GET http://YOUR_URL/cribs/:id` returns JSON
