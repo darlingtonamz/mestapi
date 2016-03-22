@@ -1,5 +1,4 @@
 class CribsController < ApplicationController
-
 	def index
 		@cribs = Crib.all
 	end
