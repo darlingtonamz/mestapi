@@ -4,17 +4,13 @@ class CribsController < ApplicationController
 	end
 
 	def show
-		@crib = Crib.find_by_id(params[:id])
-		if (!@crib)
-			@error = {
-				code: 815,
-				message: "The Crib with id #{params[:id]} doesn't exist"
-			}
-			render "error", status: 404
-		end
-
 		respond_to do |format|
-			format.json
+			format.json{
+				@crib = Crib.find_by_id(params[:id])
+				if (!@crib)
+					show_error "0"
+				end
+			}
 		end
 	end
 
@@ -27,29 +23,62 @@ class CribsController < ApplicationController
 						@crib = Crib.new(crib_param[:data])
 						@crib.owner_id = crib_param[:rels][:owner][:id]
 					rescue
-						puts "#"*100+" \n raised: 1"
-						raise "0"
+						raise "1"
 					end
 
 					if @crib.save
 						render "show"
 					else
-						puts "*"*100+" \n raised: 1"
-						raise "1"
+						raise "2"
 					end
 				rescue => ex
-					err = [422, 500]
-					mess = ["Details for creation of Crib not complete", "Unable to save data"]
-					@error = {
-						code: err[ex.to_s.to_i],
-						message: mess[ex.to_s.to_i],
-					}
-					render "error", status: err[ex.to_s.to_i]
+					show_error(ex)
 				end
 			}
 		end
+	end
 
+	def update
+		respond_to do |format|
+			format.json{
+				begin
+					begin
+						puts "#"*100+" \n : " + crib_param[:rels][:owner][:id].to_s
+						owner = Owner.find(crib_param[:rels][:owner][:id])
+					rescue
+						raise "0"
+					end
 
+					@crib = Crib.find_by_id(params[:id])
+					if @crib
+						if @crib.update(crib_param[:data])
+							render "show"
+						else
+							raise "1"
+						end
+					else
+						@crib = Crib.new(crib_param[:data])
+						@crib.id = params[:id]
+						if !@crib.save
+							raise "2"
+						end
+					end
+
+				rescue => ex
+					show_error(ex)
+				end
+			}
+		end
+	end
+
+	def show_error (ex)
+		err = [404, 422, 500]
+		mess = ["Not found", "Details for creation of Crib not complete", "Unable to save data"]
+		@error = {
+			code: err[ex.to_s.to_i],
+			message: mess[ex.to_s.to_i]
+		}
+		render "error", status: err[ex.to_s.to_i]
 	end
 
 	private
