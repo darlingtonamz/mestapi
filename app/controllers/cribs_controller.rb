@@ -20,8 +20,8 @@ class CribsController < ApplicationController
 			format.json{
 				begin
 					begin
-						@crib = Crib.new(crib_param[:data])
-						@crib.owner_id = crib_param[:rels][:owner][:id]
+						@crib = Crib.new(crib_param[:attributes])
+						@crib.owner_id = crib_param[:relationships][:owner][:id]
 					rescue
 						raise "1"
 					end
@@ -43,23 +43,25 @@ class CribsController < ApplicationController
 			format.json{
 				begin
 					begin
-						puts "#"*100+" \n : " + crib_param[:rels][:owner][:id].to_s
-						owner = Owner.find(crib_param[:rels][:owner][:id])
+						owner = Owner.find(crib_param[:relationships][:owner][:id])
 					rescue
 						raise "0"
 					end
 
 					@crib = Crib.find_by_id(params[:id])
 					if @crib
-						if @crib.update(crib_param[:data])
+						if @crib.update(crib_param[:attributes])
 							render "show"
 						else
 							raise "1"
 						end
 					else
-						@crib = Crib.new(crib_param[:data])
+						@crib = Crib.new(crib_param[:attributes])
+						@crib.owner_id = crib_param[:relationships][:owner][:id]
 						@crib.id = params[:id]
-						if !@crib.save
+						if @crib.save
+							render "show"
+						else
 							raise "2"
 						end
 					end
@@ -83,6 +85,9 @@ class CribsController < ApplicationController
 
 	private
 		def crib_param
-			params.require(:crib).permit(data:[:name, :length, :bredth, :location], rels:[owner: [:id, :name, :email]])
+			params.require(:data).permit(
+				attributes:[:name, :length, :bredth, :location],
+				relationships:[owner: [:id, :name, :email]]
+			)
 		end
 end
